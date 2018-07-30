@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'MultiSelectionTableView_Example' do
+  pod 'MultiSelectionTableView', :path => '../'
+
+  target 'MultiSelectionTableView_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
