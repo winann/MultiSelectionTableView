@@ -16,6 +16,9 @@ public class MultiSelectionTableView: UIView {
         return selectItems.flatMap { $0 }
     }
     
+    /// 排序好的结果，按照选择的顺序（只有 config 中的showSortedResult 为 true 的时候生效）
+    lazy public var sortedSelectResults: [ItemModel] = []
+    
     /// 最外层的 Model
     public var sectionModel: SectionModel? {
         didSet {
@@ -23,6 +26,8 @@ public class MultiSelectionTableView: UIView {
         }
     }
     
+    /// 选择达到最大值
+    public var maxSelectionCallBack: (() -> Void)?
     
     /// 展示UI的配置
     public var config: MultiSelectionConfig = MultiSelectionConfig() {
@@ -54,6 +59,16 @@ public class MultiSelectionTableView: UIView {
             sectionViews[0].frame = bounds
         }
     }
+    
+    private lazy var bottomView: UIScrollView = {
+        let view = UIScrollView()
+        view.backgroundColor = UIColor.clear
+        var tempFrame = bounds
+        tempFrame.origin.y = bounds.height
+        tempFrame.size.height = 0
+        view.frame = tempFrame
+        return view
+    }()
     
     /// 布局tableView
     private func layoutTableView(componentsNum: Int = 0, model: SectionModel?) {
@@ -101,6 +116,7 @@ public class MultiSelectionTableView: UIView {
             }
         }
     }
+    
     /// 移除所有的子选中状态
     private func removeAllSubselections(forCurrent componentsNum: Int, currentLastIndex: IndexPath) {
 //        /// 存储当前及之前的所有 index 方便查找对应的 Model
@@ -131,7 +147,26 @@ public class MultiSelectionTableView: UIView {
                 selectItems[index] = []
             }
         }
+        var currentSelect = selectItems[componentsNum]
+        // 清除掉当前选择的内容，重新选择
+        selectItems[componentsNum] = currentSelect.filter { (item) -> Bool in
+            return !currentModel.items.contains(item)
+        }
         selectItems[componentsNum].append(contentsOf: currentModel.selectItems.map { $0.value }.filter { $0.subsection == nil && !selectItems[componentsNum].contains($0) })
+        
+        if config.showSortedResult {
+            if sortedSelectResults.isEmpty {
+                sortedSelectResults = selectResults
+            } else {
+                sortedSelectResults = sortedSelectResults.filter { (item) -> Bool in
+                    return selectResults.contains(item)
+                }
+                sortedSelectResults.append(contentsOf: selectResults.filter({ (item) -> Bool in
+                    return !sortedSelectResults.contains(item)
+                }))
+            }
+        }
+        
     }
     
     /// 每个SectionView 每次选中都会走这个
@@ -144,6 +179,20 @@ public class MultiSelectionTableView: UIView {
         
         // 存储选中的项
         storeSelection(for: componentsNum, currentModel: currentModel)
+        
+        /// 布局选中的项
+        layoutBottomView()
+    }
+    
+    func isMaxSelection() -> Bool {
+        guard config.maxSelectCount > 0 else {
+            return false
+        }
+        let isMax = selectResults.count >= config.maxSelectCount
+        if let callBack = maxSelectionCallBack, isMax {
+            callBack()
+        }
+        return isMax
     }
     
     /// 添加SectionView
@@ -154,6 +203,7 @@ public class MultiSelectionTableView: UIView {
         } else {
             sectionView = SectionView(frame: CGRect(x: bounds.width, y: 0, width: 0, height: bounds.height), model: model, componentsNum: componentsNum)
             sectionView.selectResult = sectionViewSelect
+            sectionView.isMaxSelection = isMaxSelection
             sectionViews.append(sectionView)
         }
         sectionView.update(model: model)
@@ -212,5 +262,70 @@ public class MultiSelectionTableView: UIView {
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         configAppearance()
+    }
+    
+    private func layoutBottomView() {
+        guard config.showSelectedView else { return }
+        let btns = sortedSelectResults.map { (item) -> TagButton in
+            return TagButton.initial(with: item.title, tintColor: config.selectinHightlightColor)
+        }
+        addSubview(bottomView)
+        for subview in bottomView.subviews {
+            subview.removeFromSuperview()
+        }
+        for (i, btn) in btns.enumerated() {
+            var tempFrame = btn.frame
+            tempFrame.origin.y = 25
+            if i > 0 {
+                tempFrame.origin.x = btns[i - 1].frame.maxX + 15
+                tempFrame.origin.y = btns[i - 1].frame.minY
+                if tempFrame.maxX > bottomView.bounds.width - 15 {
+                    tempFrame.origin.y = btns[i - 1].frame.maxY + 15
+                    tempFrame.origin.x = 15
+                }
+            } else {
+                tempFrame.origin.x = 15
+            }
+            btn.frame = tempFrame
+            bottomView.addSubview(btn)
+        }
+        
+        var bottomFrame = bottomView.frame
+        if let lastBtn = btns.last {
+            var tempBottonViewFrame = bottomView.frame
+            let height =  lastBtn.frame.maxY + 25
+            tempBottonViewFrame.origin.y = bounds.height - height
+            tempBottonViewFrame.size.height = height
+            bottomFrame = tempBottonViewFrame
+        } else {
+            var tempBottomFrame = bottomView.frame
+            tempBottomFrame.size.height = 0
+            tempBottomFrame.origin.y = bounds.height
+            bottomFrame = tempBottomFrame
+        }
+        
+        /// bottomView 不能超过三分之一高
+        if bottomFrame.height > bounds.height / 3 {
+            var tempFrame = bottomFrame
+            tempFrame.size.height = bounds.height / 3
+            tempFrame.origin.y = bounds.height - tempFrame.height
+            self.bottomView.contentSize = bottomFrame.size
+            UIView.animate(withDuration: 0.3) { [weak self] in
+                self?.bottomView.frame = tempFrame
+                self?.bottomView.contentOffset = CGPoint(x: 0, y: bottomFrame.height - tempFrame.height)
+            }
+        } else {
+            UIView.animate(withDuration: 0.3) { [weak self] in
+                self?.bottomView.frame = bottomFrame
+            }
+        }
+        
+        for sectionView in sectionViews {
+            var tempFrame = sectionView.frame
+            tempFrame.size.height = bounds.height - bottomView.frame.height
+            UIView.animate(withDuration: 0.3) {
+                sectionView.frame = tempFrame
+            }
+        }
     }
 }

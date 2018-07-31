@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  MultiSelectionTableView: dfe0d7fa60adc7d5773c9bd680b04356f3c95cc6
+  MultiSelectionTableView: aacc5a0826a3ba19a621586f97f7b5ace6d0e36d
 
 PODFILE CHECKSUM: aae9b2f4705fc4f824e95e98edbcf67f25bda2f0
 

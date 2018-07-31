@@ -22,7 +22,7 @@ public struct SectionModel: Equatable {
     ///   - items: 当前列展示的项目 ItemModel
     ///   - sectionID: 当前区域的父ID（会设置每一个（items））
     ///   - withWeight: 宽度的权重（如果有两列，都为 1，）
-    public init(can multiSelect: Bool = false, items: [ItemModel], sectionID: String? = nil, widthWeight: Int = 1, appearceConfig: MultiSelectionSectionConfig? = nil) {
+    public init(can multiSelect: Bool = false, items: [ItemModel], sectionID: String? = nil, widthWeight: Float = 1, appearceConfig: MultiSelectionSectionConfig? = nil) {
         self.init()
         self.multiSelect = multiSelect
         self.items = items
@@ -42,7 +42,7 @@ public struct SectionModel: Equatable {
         }
     }
     /// 宽度的权重
-    public var widthWeight: Int = 1
+    public var widthWeight: Float = 1
     
     /// 父节点的ID，如果不知道怎么用就不要传(重设为空需要传空字符串，要唯一)
     /// !!!注意：需要先设置 items 才有用

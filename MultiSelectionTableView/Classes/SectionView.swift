@@ -10,8 +10,10 @@ import UIKit
 public typealias SelectCallBack = (_ num: Int, _ subsectionModel: SectionModel?, _ currentModel: SectionModel) -> Void
 
 class SectionView: UIView {
+    /// 选中的回调
     public var selectResult: SelectCallBack?
-    
+    /// 是否达到最大的选中
+    public var isMaxSelection: (() -> Bool)?
     internal var model: SectionModel? {
         didSet {
             if let `model` = model {
@@ -87,11 +89,11 @@ class SectionView: UIView {
     private func appearenceConfig() {
         backgroundColor = model?.config.sectionBGColors
         showSelectIcon = model?.config.showSelectIcon ?? true
+        cellBGColor = model?.config.cellBGColor ?? cellBGColor
         
         showSelectBGColor = globalConfig.showSelectBGColor
         cellSelectBGColor = globalConfig.selectBGColor
         separatorColor = globalConfig.separatorColor
-        
     }
     
     override func layoutSubviews() {
@@ -132,22 +134,32 @@ extension SectionView: UITableViewDelegate {
             return
         }
         var selectItem = model.items[indexPath.row]
+        
         if nil == selectItem.subsection || (nil != selectItem.subsection && !selectItem.isSelect) {
             selectItem.isSelect = !selectItem.isSelect
         }
         
-        func addSelection() {
+        @discardableResult
+        func addSelection() -> Bool {
             model.items[indexPath.row] = selectItem
             // 没有下一级的才可以选中
             if nil == selectItem.subsection {
+                if let callBack = isMaxSelection {
+                    if callBack() {
+                        return false
+                    }
+                }
                 model.selectItems[indexPath] = selectItem
             }
+            return true
         }
         
         var indexPaths = [indexPath]
         if model.multiSelect {
             if selectItem.isSelect {
-                addSelection()
+                if !addSelection() {
+                    return 
+                }
             } else {
                 model = removeSelections(indexPaths: [indexPath], sectionModel: model)
             }
