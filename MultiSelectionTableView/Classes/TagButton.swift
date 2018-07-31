@@ -30,4 +30,12 @@ class TagButton: UIButton {
         }
         return btn
     }
+    
+    func update(title: String) {
+        setTitle(title, for: .normal)
+        if let size = titleLabel?.sizeThatFits(CGSize(width: 0, height: 25)) {
+            let tempFrame = CGRect(x: 0, y: 0, width: size.width + 25, height: 25)
+            frame = tempFrame
+        }
+    }
 }

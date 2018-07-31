@@ -266,14 +266,28 @@ public class MultiSelectionTableView: UIView {
     
     private func layoutBottomView() {
         guard config.showSelectedView else { return }
-        let btns = sortedSelectResults.map { (item) -> TagButton in
-            return TagButton.initial(with: item.title, tintColor: config.selectinHightlightColor)
-        }
+//        let btns = sortedSelectResults.map { (item) -> TagButton in
+//            return TagButton.initial(with: item.title, tintColor: config.selectinHightlightColor)
+//        }
         addSubview(bottomView)
-        for subview in bottomView.subviews {
-            subview.removeFromSuperview()
+        let originBtns = bottomView.subviews.filter { (view) -> Bool in
+            if let btn = view as? TagButton {
+                if sortedSelectResults.contains(where: { (item) -> Bool in
+                    return item.title == btn.titleLabel?.text
+                }) {
+                    return true
+                } else {
+                    view.removeFromSuperview()
+                }
+            }
+            return false
         }
+        var btns = originBtns
+        btns.append(contentsOf: Array(repeating: TagButton.initial(with: "", tintColor: config.selectinHightlightColor), count: sortedSelectResults.count - btns.count))
         for (i, btn) in btns.enumerated() {
+            if let `btn` = btn as? TagButton {
+                btn.update(title: sortedSelectResults[i].title)
+            }
             var tempFrame = btn.frame
             tempFrame.origin.y = 25
             if i > 0 {
