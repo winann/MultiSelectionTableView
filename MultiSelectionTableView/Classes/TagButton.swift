@@ -8,6 +8,8 @@
 import UIKit
 
 class TagButton: UIButton {
+    
+    var currntID: String = ""
 
     static func initial(with title: String, tintColor: UIColor = UIColor.blue) -> TagButton {
         let btn = TagButton(type: .custom)

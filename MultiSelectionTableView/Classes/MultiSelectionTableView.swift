@@ -259,11 +259,17 @@ public class MultiSelectionTableView: UIView {
         }
     }
     
+    /// removeSelectItem
+    private func removeSelectItem(item: ItemModel) {
+        
+    }
+    
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         configAppearance()
     }
     
+    /// 布局底部的展示视图
     private func layoutBottomView() {
         guard config.showSelectedView else { return }
 //        let btns = sortedSelectResults.map { (item) -> TagButton in
@@ -286,7 +292,10 @@ public class MultiSelectionTableView: UIView {
         btns.append(contentsOf: Array(repeating: TagButton.initial(with: "", tintColor: config.selectinHightlightColor), count: sortedSelectResults.count - btns.count))
         for (i, btn) in btns.enumerated() {
             if let `btn` = btn as? TagButton {
-                btn.update(title: sortedSelectResults[i].title)
+                let item = sortedSelectResults[i]
+                btn.update(title: item.title)
+                btn.currntID = item.itemID
+                btn.addTarget(self, action: #selector(removeSelect), for: .touchUpInside)
             }
             var tempFrame = btn.frame
             tempFrame.origin.y = 25
@@ -340,6 +349,16 @@ public class MultiSelectionTableView: UIView {
             UIView.animate(withDuration: 0.3) {
                 sectionView.frame = tempFrame
             }
+        }
+    }
+    
+    @objc func removeSelect(sender: TagButton) {
+        if let rmIndex = sortedSelectResults.index(where: { (item) -> Bool in
+            return item.itemID == sender.currntID
+        }) {
+            let rmItem = sortedSelectResults.remove(at: rmIndex)
+            layoutBottomView()
+            removeSelectItem(item: rmItem)
         }
     }
 }
