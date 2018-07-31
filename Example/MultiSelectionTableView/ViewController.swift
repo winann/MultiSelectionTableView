@@ -73,6 +73,10 @@ class ViewController: UIViewController {
         /// 代码创建
         let vc = MultiSelectionTableView()
         vc.frame = view.bounds
+        var config = MultiSelectionConfig()
+        config.showSelectedView = true
+        config.showSortedResult = true
+        vc.config = config
         vc.sectionModel = firstSectionModel
         view.addSubview(vc)
         

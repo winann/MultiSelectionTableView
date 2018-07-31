@@ -89,6 +89,16 @@ public struct SectionModel: Equatable {
         items = removeSubselection(items)
         selectItems.removeAll()
     }
+    
+    /// 移除选择指定的Item
+    internal mutating func removeSubselection(item: ItemModel) {
+        if let index = items.index(of: item) {
+            var tempItem = item
+            tempItem.isSelect = false
+            items[index] = tempItem
+            selectItems.removeValue(forKey: IndexPath(row: index, section: 0))
+        }
+    }
 }
 
 /// 每一项的内容

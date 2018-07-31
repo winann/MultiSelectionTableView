@@ -13,7 +13,7 @@ public class MultiSelectionTableView: UIView {
     
     /// 选中的结果输出
     public var selectResults: [ItemModel] {
-        return selectItems.flatMap { $0 }
+        return selectItems.flatMap { $0.map { $0.1 } }
     }
     
     /// 排序好的结果，按照选择的顺序（只有 config 中的showSortedResult 为 true 的时候生效）
@@ -52,7 +52,7 @@ public class MultiSelectionTableView: UIView {
     private var sectionViews: [SectionView] = []
     
     /// 选中的内容
-    private var selectItems: [[ItemModel]] = []
+    private var selectItems: [[(IndexPath, ItemModel)]] = []
     
     public override func layoutSubviews() {
         if 1 == sectionViews.count {
@@ -139,7 +139,7 @@ public class MultiSelectionTableView: UIView {
     private func storeSelection(for componentsNum: Int, currentModel: SectionModel) {
         // 如果没有存储的地方就创建啊
         if componentsNum > selectItems.count - 1 {
-            selectItems.append(contentsOf: Array<[ItemModel]>(repeating: [], count: selectItems.count - componentsNum + 1))
+            selectItems.append(contentsOf: Array<[(IndexPath, ItemModel)]>(repeating: [], count: selectItems.count - componentsNum + 1))
         }
         // 如果当前是单选的，则把后面的所有选择清除掉
         if !currentModel.multiSelect, componentsNum < selectItems.count {
@@ -147,12 +147,16 @@ public class MultiSelectionTableView: UIView {
                 selectItems[index] = []
             }
         }
-        var currentSelect = selectItems[componentsNum]
+        let currentSelect = selectItems[componentsNum]
         // 清除掉当前选择的内容，重新选择
         selectItems[componentsNum] = currentSelect.filter { (item) -> Bool in
-            return !currentModel.items.contains(item)
+            return !currentModel.items.contains(item.1)
         }
-        selectItems[componentsNum].append(contentsOf: currentModel.selectItems.map { $0.value }.filter { $0.subsection == nil && !selectItems[componentsNum].contains($0) })
+        selectItems[componentsNum].append(contentsOf: currentModel.selectItems.map { $0 }.filter({ (_, item) -> Bool in
+            return item.subsection == nil && !selectItems[componentsNum].contains(where: { (_, selectItem) -> Bool in
+                return selectItem == item
+            })
+        }))
         
         if config.showSortedResult {
             if sortedSelectResults.isEmpty {
@@ -261,6 +265,33 @@ public class MultiSelectionTableView: UIView {
     
     /// removeSelectItem
     private func removeSelectItem(item: ItemModel) {
+        var currentComponentNum = 0
+        func findeItem(in sectionModel: SectionModel) -> SectionModel {
+            var tempSectionModel = sectionModel
+            for (i, currentItem) in sectionModel.items.enumerated() {
+                var tempItem = currentItem
+                if currentItem == item {
+                    tempItem.isSelect = false
+                    tempSectionModel.items[i] = tempItem
+                    tempSectionModel.selectItems.removeValue(forKey: IndexPath(row: i, section: 0))
+                    if 0..<sectionViews.count ~= currentComponentNum {
+                        sectionViews[currentComponentNum].update(model: tempSectionModel)
+                    }
+                } else if let subsection = currentItem.subsection, !subsection.selectItems.isEmpty {
+//                    currentComponentNum += 1
+                    tempItem.subsection = findeItem(in: subsection)
+                    tempSectionModel.items[i] = tempItem
+                }
+            }
+            return tempSectionModel
+        }
+        if !sectionViews.isEmpty, let model = sectionViews[0].model {
+            sectionViews[0].update(model: findeItem(in: model))
+            for subview in sectionViews {
+                subview.tableView.reloadData()
+                subview.tableView.selectRow(at: subview.currentIndex, animated: false, scrollPosition: .none)
+            }
+        }
         
     }
     
