@@ -29,6 +29,9 @@ class ViewController: UIViewController {
             var model = ItemModel()
             model.title = String(Character(UnicodeScalar(num)!))
             model.itemID = model.title
+            if 97 == num {
+                model.isSelect = true
+            }
             if num % 4 ==  0 {
                 var sectionModel = thirdSectionModel1
                 sectionModel.sectionID = (sectionModel.sectionID ?? "") + "\(num)"
@@ -66,6 +69,8 @@ class ViewController: UIViewController {
                 let start = index * 5
                 sectionModel.items = Array(items[start..<start + 5])
                 model.subsection = sectionModel
+            } else if index >= 8 {
+//                model.isSelect = true
             }
             return model
         }

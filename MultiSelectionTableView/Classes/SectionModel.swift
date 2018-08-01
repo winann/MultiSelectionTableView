@@ -39,6 +39,7 @@ public struct SectionModel: Equatable {
     public var items: [ItemModel] {
         didSet {
             setParentForItems(false)
+            updateSelection()
         }
     }
     /// 宽度的权重
@@ -53,6 +54,18 @@ public struct SectionModel: Equatable {
     }
     /// 选中的项
     public internal(set) var selectItems: [IndexPath: ItemModel] = [:]
+    
+    private mutating func updateSelection() {
+        var selects: [IndexPath: ItemModel] = [:]
+        for (i, item) in items.enumerated() {
+            if item.isSelect {
+                selects[IndexPath(row: i, section: 0)] = item
+            } else if let select = item.subsection?.selectItems, !select.isEmpty {
+                selects[IndexPath(row: i, section: 0)] = item
+            }
+        }
+        selectItems = selects
+    }
     
     private mutating func setParentForItems(_ isForce: Bool = true) {
         guard let id = sectionID else {

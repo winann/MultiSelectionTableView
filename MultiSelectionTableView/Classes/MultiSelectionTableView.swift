@@ -23,6 +23,7 @@ public class MultiSelectionTableView: UIView {
     public var sectionModel: SectionModel? {
         didSet {
             layoutTableView(model: sectionModel)
+            initSelects()
         }
     }
     
@@ -55,9 +56,9 @@ public class MultiSelectionTableView: UIView {
     private var selectItems: [[(IndexPath, ItemModel)]] = []
     
     public override func layoutSubviews() {
-        if 1 == sectionViews.count {
-            sectionViews[0].frame = bounds
-        }
+//        if 1 == sectionViews.count {
+//            sectionViews[0].frame = bounds
+//        }
     }
     
     private lazy var bottomView: UIScrollView = {
@@ -76,6 +77,25 @@ public class MultiSelectionTableView: UIView {
             addSectionView(super: componentsNum, model: tempModel)
         } else {
             removeSectionView(super: componentsNum)
+        }
+    }
+    
+    /// 初始化初始的选择
+    private func initSelects() {
+        func addSelect(model: SectionModel) {
+            for item in model.items {
+                if item.isSelect, nil == item.subsection {
+                    sortedSelectResults.append(item)
+                } else if let subsection = item.subsection {
+                    addSelect(model: subsection)
+                }
+            }
+        }
+        if let model = sectionModel {
+            addSelect(model: model)
+            if !sortedSelectResults.isEmpty {
+                layoutBottomView()
+            }
         }
     }
     
@@ -110,9 +130,16 @@ public class MultiSelectionTableView: UIView {
         }
         
         /// 如果当前选择是单选，则全部置空子视图的选择
-        if componentsNum < sectionViews.count - 1 {
-            if true != currentSectionView.model?.multiSelect, let currentIndex = currentSectionView.currentIndex, let currentLastIndex = currentSectionView.lastIndex, currentIndex != currentLastIndex {
-                removeAllSubselections(forCurrent: componentsNum, currentLastIndex: currentLastIndex)
+        if componentsNum < sectionViews.count {
+            if true != currentSectionView.model?.multiSelect, let currentIndex = currentSectionView.currentIndex {
+                if let count = currentSectionView.model?.items.count {
+                    for i in 0..<count {
+                        if i != currentIndex.row {
+                            removeAllSubselections(forCurrent: componentsNum, currentLastIndex: IndexPath(row: i, section: 0))
+                        }
+                    }
+                }
+                
             }
         }
     }
@@ -278,7 +305,7 @@ public class MultiSelectionTableView: UIView {
                         sectionViews[currentComponentNum].update(model: tempSectionModel)
                     }
                 } else if let subsection = currentItem.subsection, !subsection.selectItems.isEmpty {
-//                    currentComponentNum += 1
+                    currentComponentNum += 1
                     tempItem.subsection = findeItem(in: subsection)
                     tempSectionModel.items[i] = tempItem
                 }
@@ -286,10 +313,19 @@ public class MultiSelectionTableView: UIView {
             return tempSectionModel
         }
         if !sectionViews.isEmpty, let model = sectionViews[0].model {
-            sectionViews[0].update(model: findeItem(in: model))
-            for subview in sectionViews {
-                subview.tableView.reloadData()
-                subview.tableView.selectRow(at: subview.currentIndex, animated: false, scrollPosition: .none)
+            let resultModel = findeItem(in: model)
+            sectionViews[0].update(model: resultModel)
+            sectionViews[0].currentIndex = sectionViews[0].lastIndex
+            for (i, subview) in sectionViews.enumerated() {
+                if i > 0 {
+                    let lastSectionView = sectionViews[i - 1]
+                    if let lastIndex = lastSectionView.currentIndex?.row, let sectionModel = lastSectionView.model?.items[lastIndex].subsection {
+                        sectionViews[i].update(model: sectionModel)
+                        sectionViews[i].currentIndex = sectionViews[i].lastIndex
+                    }
+                }
+//                subview.tableView.reloadData()
+//                sectionViews[i].tableView.selectRow(at: subview.currentIndex, animated: false, scrollPosition: .none)
             }
         }
         
@@ -320,8 +356,16 @@ public class MultiSelectionTableView: UIView {
             return false
         }
         var btns = originBtns
-        btns.append(contentsOf: Array(repeating: TagButton.initial(with: "", tintColor: config.selectinHightlightColor), count: sortedSelectResults.count - btns.count))
+        if sortedSelectResults.count > btns.count {
+            for _ in (0..<sortedSelectResults.count - btns.count) {
+                btns.append(TagButton.initial(with: "", tintColor: config.selectinHightlightColor))
+            }
+        } else {
+            btns = Array(btns.prefix(sortedSelectResults.count))
+        }
+
         for (i, btn) in btns.enumerated() {
+            btn.frame = CGRect.zero
             if let `btn` = btn as? TagButton {
                 let item = sortedSelectResults[i]
                 btn.update(title: item.title)
@@ -341,6 +385,7 @@ public class MultiSelectionTableView: UIView {
                 tempFrame.origin.x = 15
             }
             btn.frame = tempFrame
+            btns[i] = btn
             bottomView.addSubview(btn)
         }
         
@@ -374,11 +419,13 @@ public class MultiSelectionTableView: UIView {
             }
         }
         
-        for sectionView in sectionViews {
-            var tempFrame = sectionView.frame
-            tempFrame.size.height = bounds.height - bottomView.frame.height
-            UIView.animate(withDuration: 0.3) {
-                sectionView.frame = tempFrame
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            for (i, sectionView) in self.sectionViews.enumerated() {
+                var tempFrame = sectionView.frame
+                tempFrame.size.height = self.bounds.height - self.bottomView.frame.height
+                UIView.animate(withDuration: 0.3) {
+                    self.sectionViews[i].frame = tempFrame
+                }
             }
         }
     }

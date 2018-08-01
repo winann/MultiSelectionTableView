@@ -17,11 +17,18 @@ class SectionView: UIView {
     internal var model: SectionModel? {
         didSet {
             if let `model` = model {
-                self.model?.items = model.items.map { (item) -> ItemModel in
-                    var `item` = item
-                    item.isSelect = model.selectItems.contains { $0.value == item }
-                    return item
-                }
+//                self.model?.items = model.items.map { (item) -> ItemModel in
+//                    var `item` = item
+//                    item.isSelect = model.selectItems.contains { $0.value == item }
+//                    return item
+//                }
+//                var selects: [IndexPath: ItemModel] = [:]
+//                for (i, item) in model.items.enumerated() {
+//                    if item.isSelect {
+//                        selects[IndexPath(row: i, section: 0)] = item
+//                    }
+//                }
+//                self.model?.selectItems = selects
                 appearenceConfig()
             }
         }
@@ -201,10 +208,12 @@ extension SectionView: UITableViewDataSource {
         if let cell = tableView.dequeueReusableCell(withIdentifier: "ContentTableViewCell") as? ContentTableViewCell {
             cell.model = model?.items[indexPath.row]
             cell.backgroundColor = cellBGColor
+            cell.textLabel?.textColor = globalConfig.textColor
             if currentIndex == indexPath, let _ = cell.model?.subsection {
                 if showSelectBGColor {
                     cell.backgroundColor = UIColor.white
-                } else if globalConfig.selectionIsHightlight {
+                }
+                if globalConfig.selectionIsHightlight {
                     cell.titleLabel.textColor = globalConfig.selectinHightlightColor
                 }
             }

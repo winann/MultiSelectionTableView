@@ -29,6 +29,8 @@ class TagButton: UIButton {
         if let size = btn.titleLabel?.sizeThatFits(CGSize(width: 0, height: 25)) {
             let frame = CGRect(x: 0, y: 0, width: size.width + 25, height: 25)
             btn.frame = frame
+        } else {
+            btn.frame = CGRect(x: 0, y: 0, width: 40, height: 25)
         }
         return btn
     }
