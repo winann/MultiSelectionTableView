@@ -82,11 +82,14 @@ public class MultiSelectionTableView: UIView {
     
     /// 初始化初始的选择
     private func initSelects() {
+        var targetComponents = 0
         func addSelect(model: SectionModel) {
             for item in model.items {
                 if item.isSelect, nil == item.subsection {
-                    sortedSelectResults.append(item)
+//                    sortedSelectResults.append(item)
+                    storeSelection(for: targetComponents, currentModel: model)
                 } else if let subsection = item.subsection {
+                    targetComponents += 1
                     addSelect(model: subsection)
                 }
             }
@@ -166,7 +169,7 @@ public class MultiSelectionTableView: UIView {
     private func storeSelection(for componentsNum: Int, currentModel: SectionModel) {
         // 如果没有存储的地方就创建啊
         if componentsNum > selectItems.count - 1 {
-            selectItems.append(contentsOf: Array<[(IndexPath, ItemModel)]>(repeating: [], count: selectItems.count - componentsNum + 1))
+            selectItems.append(contentsOf: Array<[(IndexPath, ItemModel)]>(repeating: [], count: componentsNum - selectItems.count + 1))
         }
         // 如果当前是单选的，则把后面的所有选择清除掉
         if !currentModel.multiSelect, componentsNum < selectItems.count {
