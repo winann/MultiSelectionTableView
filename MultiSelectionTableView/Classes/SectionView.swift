@@ -147,13 +147,15 @@ extension SectionView: UITableViewDelegate {
         }
         
         @discardableResult
-        func addSelection() -> Bool {
+        func addSelection(_ skipCallBack: Bool = false) -> Bool {
             model.items[indexPath.row] = selectItem
             // 没有下一级的才可以选中
             if nil == selectItem.subsection {
-                if let callBack = isMaxSelection {
-                    if callBack() {
-                        return false
+                if !skipCallBack {
+                    if let callBack = isMaxSelection {
+                        if callBack() {
+                            return false
+                        }
                     }
                 }
                 model.selectItems[indexPath] = selectItem
@@ -162,10 +164,14 @@ extension SectionView: UITableViewDelegate {
         }
         
         var indexPaths = [indexPath]
-        if model.multiSelect {
+        if model.multiSelect && !selectItem.isExclusive {
             if selectItem.isSelect {
                 if !addSelection() {
                     return 
+                }
+                if let isExclusiveIndexs = model.items.index(where: { $0.isExclusive }) {
+                    
+                    model = removeSelections(indexPaths: [IndexPath(row: isExclusiveIndexs, section: 0)], sectionModel: model)
                 }
             } else {
                 model = removeSelections(indexPaths: [indexPath], sectionModel: model)
@@ -174,7 +180,7 @@ extension SectionView: UITableViewDelegate {
             let removeIndexPaths = Array(model.selectItems.keys)
             if selectItem.isSelect {
                 model = removeSelections(indexPaths: removeIndexPaths, sectionModel: model)
-                addSelection()
+                addSelection(true)
                 indexPaths.append(contentsOf: removeIndexPaths)
             } else {
                 model = removeSelections(indexPaths: removeIndexPaths, sectionModel: model)
