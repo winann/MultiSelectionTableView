@@ -64,7 +64,9 @@ public class MultiSelectionTableView: UIView {
     
     public override func layoutSubviews() {
         if 1 == sectionViews.count {
-            sectionViews[0].frame = bounds
+            var tempFrame = bounds
+            tempFrame.size.height = bounds.height - bottomView.bounds.height
+            sectionViews[0].frame = tempFrame
         }
     }
     
