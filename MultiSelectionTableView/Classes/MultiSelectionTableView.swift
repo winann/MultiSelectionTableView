@@ -312,6 +312,27 @@ public class MultiSelectionTableView: UIView {
             }
             return tempSectionModel
         }
+        var outIndex = 0
+        var innerIndex = 0
+        for i in 0..<selectItems.count {
+            for j in 0..<selectItems[i].count {
+                if selectItems[i].contains(where: { arg -> Bool in
+                    return arg.1 == item
+                }) {
+                    outIndex = i
+                    innerIndex = j
+                    break
+                }
+            }
+        }
+        if selectItems.count > outIndex {
+            var innerSelect = selectItems[outIndex]
+            if innerSelect.count > innerIndex, selectItems.count > outIndex {
+                innerSelect.remove(at: innerIndex)
+                selectItems[outIndex] = innerSelect
+            }
+        }
+        
         if !sectionViews.isEmpty, let model = sectionViews[0].model {
             let resultModel = findeItem(in: model)
             sectionViews[0].update(model: resultModel)
@@ -323,6 +344,9 @@ public class MultiSelectionTableView: UIView {
                         sectionViews[i].update(model: sectionModel)
                         sectionViews[i].currentIndex = sectionViews[i].lastIndex
                     }
+                }
+                if let index = sectionViews[i].currentIndex {
+                    sectionViews[i].tableView.selectRow(at: index, animated: false, scrollPosition: .none)
                 }
 //                subview.tableView.reloadData()
 //                sectionViews[i].tableView.selectRow(at: subview.currentIndex, animated: false, scrollPosition: .none)
