@@ -37,7 +37,9 @@ class ContentTableViewCell: UITableViewCell {
         if let subselectCount = model.subsection?.selectItems.count, subselectCount > 0, config.showSubselectionCount {
             titleLabel.text = model.title + " (\(subselectCount))"
         }
-        if config.selectionIsHightlight, model.isSelect {
+        if config.selectionIsHightlight, model.isSelect, model.subsection == nil {
+            titleLabel.textColor = config.selectinHightlightColor
+        } else if let subselectCount = model.subsection?.selectItems.count, subselectCount > 0 {
             titleLabel.textColor = config.selectinHightlightColor
         } else {
             titleLabel.textColor = config.textColor

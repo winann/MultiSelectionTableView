@@ -63,9 +63,9 @@ public class MultiSelectionTableView: UIView {
     private var selectItems: [[(IndexPath, ItemModel)]] = []
     
     public override func layoutSubviews() {
-//        if 1 == sectionViews.count {
-//            sectionViews[0].frame = bounds
-//        }
+        if 1 == sectionViews.count {
+            sectionViews[0].frame = bounds
+        }
     }
     
     private lazy var bottomView: UIScrollView = {
