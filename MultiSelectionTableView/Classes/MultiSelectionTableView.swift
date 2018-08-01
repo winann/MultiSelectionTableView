@@ -49,6 +49,13 @@ public class MultiSelectionTableView: UIView {
     }
     
     
+    /// 移除所有选择
+    public func removeAllSelection() {
+        for select in selectResults {
+            removeSelectItem(item: select)
+        }
+    }
+    
     /// 存储每个SectionView（创建后不会删除）
     private var sectionViews: [SectionView] = []
     
@@ -236,6 +243,7 @@ public class MultiSelectionTableView: UIView {
             sectionView = sectionViews[componentsNum]
         } else {
             sectionView = SectionView(frame: CGRect(x: bounds.width, y: 0, width: 0, height: bounds.height), model: model, componentsNum: componentsNum)
+            sectionView.globalConfig = config
             sectionView.selectResult = sectionViewSelect
             sectionView.isMaxSelection = isMaxSelection
             sectionViews.append(sectionView)

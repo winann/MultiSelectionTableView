@@ -214,14 +214,15 @@ extension SectionView: UITableViewDataSource {
         if let cell = tableView.dequeueReusableCell(withIdentifier: "ContentTableViewCell") as? ContentTableViewCell {
             cell.model = model?.items[indexPath.row]
             cell.backgroundColor = cellBGColor
-            cell.textLabel?.textColor = globalConfig.textColor
+            cell.config = globalConfig
+//            cell.textLabel?.textColor = globalConfig.textColor
             if currentIndex == indexPath, let _ = cell.model?.subsection {
                 if showSelectBGColor {
                     cell.backgroundColor = UIColor.white
                 }
-                if globalConfig.selectionIsHightlight {
-                    cell.titleLabel.textColor = globalConfig.selectinHightlightColor
-                }
+//                if globalConfig.selectionIsHightlight {
+//                    cell.titleLabel.textColor = globalConfig.selectinHightlightColor
+//                }
             }
             return cell
         }
