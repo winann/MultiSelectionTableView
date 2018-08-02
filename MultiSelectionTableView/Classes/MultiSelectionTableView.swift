@@ -259,16 +259,25 @@ public class MultiSelectionTableView: UIView {
             if sectionViews.count < componentsNum {
                 originFrame.append(CGRect(x: bounds.width, y: 0, width: 0, height: bounds.height))
             }
+            let totalWidth = sectionViews.compactMap {$0.model?.widthWeight}.reduce(0.0) { (result, current) -> Float in
+                return result + current
+            }
+            var tempFrames: [CGRect] = []
             let targetFrames = originFrame.enumerated().map { (index, frame) -> CGRect in
                 var tempFrame = frame
                 if index <= componentsNum {
-                    tempFrame.size.width = bounds.width / CGFloat(componentsNum + 1)
-                    tempFrame.origin.x = CGFloat(index) * tempFrame.size.width
+                    tempFrame.size.width = bounds.width / CGFloat(totalWidth) * CGFloat(sectionViews[index].model?.widthWeight ?? 1)
+                    if index == 0 {
+                        
+                        tempFrame.origin.x = 0
+                    } else {
+                        tempFrame.origin.x = tempFrames[index - 1].maxX
+                    }
                 } else {
                     tempFrame.size.width = 0
                     tempFrame.origin.x = bounds.width
                 }
-                
+                tempFrames.append(tempFrame)
                 return tempFrame
             }
             
@@ -282,14 +291,21 @@ public class MultiSelectionTableView: UIView {
     
     /// 移除SectionView
     private func removeSectionView(super componentsNum: Int) {
+        let totalWidth = sectionViews.compactMap {$0.model?.widthWeight}.reduce(0.0) { (result, current) -> Float in
+            return result + current
+        }
         var leftWidths = (0..<componentsNum).map { (num) -> CGFloat in
-            return bounds.width / CGFloat(componentsNum)
+            return bounds.width / CGFloat(totalWidth) * CGFloat(sectionViews[num].model?.widthWeight ?? 1)
         }
         let originFrames = sectionViews.map { $0.frame }
         let targetFrames = originFrames.enumerated().map { (index, frame) -> CGRect in
             var tempFrame = frame
             if index < componentsNum {
-                tempFrame.origin.x = CGFloat(index) * leftWidths[index]
+                if 0 == index {
+                    tempFrame.origin.x = 0
+                } else {
+                    tempFrame.origin.x = sectionViews[index - 1].frame.maxX
+                }
                 tempFrame.size.width = leftWidths[index]
             } else {
                 tempFrame.origin.x = bounds.width
