@@ -345,9 +345,7 @@ public class MultiSelectionTableView: UIView {
         var innerIndex = 0
         for i in 0..<selectItems.count {
             for j in 0..<selectItems[i].count {
-                if selectItems[i].contains(where: { arg -> Bool in
-                    return arg.1 == item
-                }) {
+                if selectItems[i][j].1 == item {
                     outIndex = i
                     innerIndex = j
                     break
@@ -356,7 +354,7 @@ public class MultiSelectionTableView: UIView {
         }
         if selectItems.count > outIndex {
             var innerSelect = selectItems[outIndex]
-            if innerSelect.count > innerIndex, selectItems.count > outIndex {
+            if innerSelect.count > innerIndex {
                 innerSelect.remove(at: innerIndex)
                 selectItems[outIndex] = innerSelect
             }
