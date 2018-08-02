@@ -22,8 +22,9 @@ Use for iOS multiSelection
   s.source           = { :git => 'https://github.com/winann/MultiSelectionTableView.git', :tag => s.version.to_s }
 
   s.ios.deployment_target = '8.0'
+  s.swift_version = '4.0'
 
-s.source_files = 'MultiSelectionTableView/Classes/**/*.swift'
+  s.source_files = 'MultiSelectionTableView/Classes/**/*.swift'
   
   s.resource_bundles = {
     'MultiSelectionTableView' => ['MultiSelectionTableView/**/*.png','MultiSelectionTableView/**/*.xib']
