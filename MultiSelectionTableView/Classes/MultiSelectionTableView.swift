@@ -364,7 +364,7 @@ public class MultiSelectionTableView: UIView {
             let resultModel = findeItem(in: model)
             sectionViews[0].update(model: resultModel)
             sectionViews[0].currentIndex = sectionViews[0].lastIndex
-            for (i, subview) in sectionViews.enumerated() {
+            for (i, _) in sectionViews.enumerated() {
                 if i > 0 {
                     let lastSectionView = sectionViews[i - 1]
                     if let lastIndex = lastSectionView.currentIndex?.row, let sectionModel = lastSectionView.model?.items[lastIndex].subsection {

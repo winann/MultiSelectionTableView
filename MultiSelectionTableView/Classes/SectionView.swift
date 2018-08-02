@@ -16,7 +16,7 @@ class SectionView: UIView {
     public var isMaxSelection: (() -> Bool)?
     internal var model: SectionModel? {
         didSet {
-            if let `model` = model {
+            if let _ = model {
 //                self.model?.items = model.items.map { (item) -> ItemModel in
 //                    var `item` = item
 //                    item.isSelect = model.selectItems.contains { $0.value == item }
