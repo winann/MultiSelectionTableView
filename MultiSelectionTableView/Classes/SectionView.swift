@@ -7,7 +7,7 @@
 
 import UIKit
 
-public typealias SelectCallBack = (_ num: Int, _ subsectionModel: SectionModel?, _ currentModel: SectionModel) -> Void
+public typealias SelectCallBack = (_ num: Int, _ selectModel: ItemModel, _ currentModel: SectionModel) -> Void
 
 class SectionView: UIView {
     /// 选中的回调
@@ -194,7 +194,7 @@ extension SectionView: UITableViewDelegate {
         self.model = model
         tableView.reloadRows(at: indexPaths, with: .none)
         if let callBack = selectResult {
-            callBack(componentsNum, selectItem.subsection, model)
+            callBack(componentsNum, selectItem, model)
         }
     }
     

@@ -175,15 +175,34 @@ public class MultiSelectionTableView: UIView {
     }
     
     /// 存储选中的内容
-    private func storeSelection(for componentsNum: Int, currentModel: SectionModel) {
+    private func storeSelection(for componentsNum: Int, currentModel: SectionModel, currentItem: ItemModel? = nil) {
         // 如果没有存储的地方就创建啊
         if componentsNum > selectItems.count - 1 {
             selectItems.append(contentsOf: Array<[(IndexPath, ItemModel)]>(repeating: [], count: componentsNum - selectItems.count + 1))
         }
         // 如果当前是单选的，则把后面的所有选择清除掉
         if !currentModel.multiSelect, componentsNum < selectItems.count {
+            var resultItems:[ItemModel] = []
+            if let current = currentItem {
+                // 取出所有当前选中的 item 下面的所有 item，保留
+                func select(items currentItem: ItemModel) -> [ItemModel] {
+                    var items: [ItemModel] = []
+                    if let subsection = currentItem.subsection, !subsection.selectItems.isEmpty {
+                        for item in subsection.items {
+                            items.append(contentsOf: select(items: item))
+                        }
+                    } else if currentItem.isSelect {
+                        items.append(currentItem)
+                    }
+                    return items
+                }
+                resultItems = select(items: current)
+            }
             for index in componentsNum..<selectItems.count {
-                selectItems[index] = []
+                let result = selectItems[index].filter { (_, itemMode) -> Bool in
+                    return resultItems.contains(itemMode)
+                }
+                selectItems[index] = result
             }
         }
         let currentSelect = selectItems[componentsNum]
@@ -213,7 +232,8 @@ public class MultiSelectionTableView: UIView {
     }
     
     /// 每个SectionView 每次选中都会走这个
-    private func sectionViewSelect(componentsNum: Int, subsectionModel: SectionModel?, currentModel: SectionModel) {
+    private func sectionViewSelect(componentsNum: Int, selectModel: ItemModel, currentModel: SectionModel) {
+        let subsectionModel = selectModel.subsection
         /// 整体UI 更新
         relateRefreshAllSectionView(with: componentsNum)
         
@@ -221,7 +241,7 @@ public class MultiSelectionTableView: UIView {
         layoutTableView(componentsNum: componentsNum + 1, model: subsectionModel)
         
         // 存储选中的项
-        storeSelection(for: componentsNum, currentModel: currentModel)
+        storeSelection(for: componentsNum, currentModel: currentModel, currentItem: selectModel)
         
         /// 布局选中的项
         layoutBottomView()
