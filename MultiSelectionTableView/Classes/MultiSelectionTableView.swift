@@ -328,7 +328,7 @@ public class MultiSelectionTableView: UIView {
     
     /// 移除SectionView
     private func removeSectionView(super componentsNum: Int) {
-        let totalWidth = sectionViews.compactMap {$0.model?.widthWeight}.reduce(0.0) { (result, current) -> Float in
+        let totalWidth = sectionViews[0..<componentsNum].compactMap {$0.model?.widthWeight}.reduce(0.0) { (result, current) -> Float in
             return result + current
         }
         var leftWidths = (0..<componentsNum).map { (num) -> CGFloat in
