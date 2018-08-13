@@ -91,6 +91,9 @@ class SectionView: UIView {
         self.tableView.reloadData()
     }
     
+    func selectFirstAll() {
+        self.select(tableView, didSelectRowAt: IndexPath(row: 0, section: 0))
+    }
     
     /// 展示的配置
     private func appearenceConfig() {
@@ -133,10 +136,7 @@ class SectionView: UIView {
         }
         return model
     }
-}
-
-extension SectionView: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func select(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard var `model` = model, indexPath.row < model.items.count else {
             return
         }
@@ -167,7 +167,7 @@ extension SectionView: UITableViewDelegate {
         if model.multiSelect && !selectItem.isExclusive {
             if selectItem.isSelect {
                 if !addSelection() {
-                    return 
+                    return
                 }
                 if let isExclusiveIndexs = model.items.index(where: { $0.isExclusive }) {
                     
@@ -196,6 +196,12 @@ extension SectionView: UITableViewDelegate {
         if let callBack = selectResult {
             callBack(componentsNum, selectItem, model)
         }
+    }
+}
+
+extension SectionView: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        select(tableView, didSelectRowAt: indexPath)
     }
     
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {

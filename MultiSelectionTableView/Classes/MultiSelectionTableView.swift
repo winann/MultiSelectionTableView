@@ -245,6 +245,18 @@ public class MultiSelectionTableView: UIView {
         
         /// 布局选中的项
         layoutBottomView()
+        
+        
+        selectSubectionFirst(componentsNum, selectModel: selectModel)
+    }
+    
+    /// 如果有下一级，并且第一个为全部的话，则选中
+    private func selectSubectionFirst(_ componentsNum: Int, selectModel: ItemModel) {
+        if let subsection = selectModel.subsection {
+            if let first = subsection.items.first, first.isExclusive {
+                sectionViews[componentsNum + 1].selectFirstAll()
+            }
+        }
     }
     
     func isMaxSelection() -> Bool {
