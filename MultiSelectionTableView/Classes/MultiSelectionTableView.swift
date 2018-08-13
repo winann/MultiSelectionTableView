@@ -279,7 +279,9 @@ public class MultiSelectionTableView: UIView {
             if sectionViews.count < componentsNum {
                 originFrame.append(CGRect(x: bounds.width, y: 0, width: 0, height: bounds.height))
             }
-            let totalWidth = sectionViews.compactMap {$0.model?.widthWeight}.reduce(0.0) { (result, current) -> Float in
+            
+            let totalWidth = Array(sectionViews[0..<componentsNum + ((sectionViews.count > componentsNum) ? 1 : 0)])
+                .compactMap {$0.model?.widthWeight}.reduce(0.0) { (result, current) -> Float in
                 return result + current
             }
             var tempFrames: [CGRect] = []
