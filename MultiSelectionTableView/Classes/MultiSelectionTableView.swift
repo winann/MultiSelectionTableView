@@ -253,8 +253,11 @@ public class MultiSelectionTableView: UIView {
     /// 如果有下一级，并且第一个为全部的话，则选中
     private func selectSubectionFirst(_ componentsNum: Int, selectModel: ItemModel) {
         if let subsection = selectModel.subsection {
-            if let first = subsection.items.first, first.isExclusive {
+            if let first = subsection.items.first, first.isExclusive, !first.isSelect, subsection.selectItems.isEmpty {
                 sectionViews[componentsNum + 1].selectFirstAll()
+                if let last = sectionViews[componentsNum].lastIndex {
+                    sectionViews[componentsNum].tableView.reloadRows(at: [last], with: .none)
+                }
             }
         }
     }
