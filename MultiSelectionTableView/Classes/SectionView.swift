@@ -172,6 +172,7 @@ class SectionView: UIView {
                 if let isExclusiveIndexs = model.items.index(where: { $0.isExclusive }) {
                     
                     model = removeSelections(indexPaths: [IndexPath(row: isExclusiveIndexs, section: 0)], sectionModel: model)
+                    indexPaths.append(IndexPath(row: isExclusiveIndexs, section: 0))
                 }
             } else {
                 model = removeSelections(indexPaths: [indexPath], sectionModel: model)
