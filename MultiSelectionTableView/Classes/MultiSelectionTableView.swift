@@ -70,6 +70,14 @@ public class MultiSelectionTableView: UIView {
         }
     }
     
+    
+    /// 选中第一列的某项
+    public func select(_ index: Int) {
+        if let sectionModel = self.sectionModel, sectionModel.items.count > index {
+            sectionViews[0].select(index: index)
+        }
+    }
+    
     private lazy var bottomView: UIScrollView = {
         let view = UIScrollView()
         view.backgroundColor = UIColor.clear

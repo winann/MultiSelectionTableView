@@ -94,6 +94,13 @@ class SectionView: UIView {
     func selectFirstAll() {
         self.select(tableView, didSelectRowAt: IndexPath(row: 0, section: 0))
     }
+
+    func select(index: Int) {
+        guard index < model?.items.count ?? 0 else {
+            return
+        }
+        self.select(tableView, didSelectRowAt: IndexPath(row: index, section: 0))
+    }
     
     /// 展示的配置
     private func appearenceConfig() {
