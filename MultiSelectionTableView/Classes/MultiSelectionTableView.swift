@@ -105,7 +105,7 @@ public class MultiSelectionTableView: UIView {
                 if item.isSelect, nil == item.subsection {
 //                    sortedSelectResults.append(item)
                     storeSelection(for: targetComponents, currentModel: model)
-                } else if let subsection = item.subsection {
+                } else if item.isSelect, let subsection = item.subsection {
                     targetComponents += 1
                     addSelect(model: subsection)
                 }
